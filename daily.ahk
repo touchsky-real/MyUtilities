@@ -1,5 +1,9 @@
 ﻿#Requires AutoHotkey v2.0
 
+
+; =================================================================================
+; 输入字符串
+
 CapsLock & a::   ; Tab + q 热键,input string
 {
     temp := EnvGet("mytemp")
@@ -10,8 +14,13 @@ CapsLock & a::   ; Tab + q 热键,input string
     SendInput temp . "{Enter}"
 }
 
+; 输入字符串
+; =================================================================================
 
 
+
+; =================================================================================
+; Ctrl+Alt+A使用Chrome来google搜索选中文字
 
 ^!a::  ; Ctrl+Alt+A 热键
 {
@@ -47,28 +56,24 @@ CapsLock & a::   ; Tab + q 热键,input string
     ClipSaved := ""  ; 释放内存
 }
 
-; URL 编码函数
-UrlEncode(String)
-{
-    EncStr := ""
-    Loop Parse, String
-    {
-        if RegExMatch(A_LoopField, "^[a-zA-Z0-9]$")
-        {
-            EncStr .= A_LoopField
-            continue
-        }
-        Hex := Format("{:02X}", Ord(A_LoopField))
-        EncStr .= "%" . Hex
-    }
-    return EncStr
+UrlEncode(Url, Flags := 0x000C3000) {
+	Local CC := 4096, Esc := "", Result := ""
+	Loop
+		VarSetStrCapacity(&Esc, CC), Result := DllCall("Shlwapi.dll\UrlEscapeW", "Str", Url, "Str", &Esc, "UIntP", &CC, "UInt", Flags, "UInt")
+	Until Result != 0x80004003 ; E_POINTER
+	Return Esc
 }
 
-; 每天自动打开热搜
+UrlUnescape(Url, Flags := 0x00140000) {
+   Return !DllCall("Shlwapi.dll\UrlUnescape", "Ptr", StrPtr(Url), "Ptr", 0, "UInt", 0, "UInt", Flags, "UInt") ? Url : ""
+}
+
+; Ctrl+Alt+A使用Chrome来google搜索选中文字
 ; =================================================================================
 
-#Requires AutoHotkey v2.0
-#SingleInstance Force
+
+; =================================================================================
+; 每天自动打开热搜
 
 ; 定义全局变量
 iniFile := A_Temp "\chrome_open_tracker.ini"
@@ -126,5 +131,5 @@ OpenWebOnFirstLaunch() {
     }
 }
 
-; =================================================================================
 ; 每天自动打开热搜
+; =================================================================================
