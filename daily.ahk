@@ -38,7 +38,7 @@ CapsLock & a::   ; Tab + q 热键,input string
     EncodedText := UrlEncode(SelectedText)
 
     ; 构造 Google 搜索 URL
-    SearchUrl := "https://www.google.com/search?q=" . EncodedText . "&ie=UTF-8"
+    SearchUrl := "https://www.google.com/search?q=" . EncodedText . "&hl=zh-CN&lr=zh-Hans|en"
 
     ; 用 Chrome 打开搜索 URL
     Run "chrome.exe " . SearchUrl
