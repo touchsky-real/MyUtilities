@@ -20,41 +20,52 @@ CapsLock & a::   ; CapsLock + a 热键,input string
 
 
 ; =================================================================================
-; Ctrl+Alt+A使用Chrome来google搜索选中文字
+; Ctrl+Alt+A使用Chrome来baidu搜索选中文字
 
-^!a::  ; Ctrl+Alt+A 热键
+^!a::  ; Ctrl+Alt+A 触发热键
 {
-    ClipSaved := ClipboardAll()  ; 保存当前剪贴板内容
+    ClipSaved := ClipboardAll()  ; 备份剪贴板
     A_Clipboard := ""  ; 清空剪贴板
-    Send "^c"  ; 发送 Ctrl+C 来复制选中内容
-    if !ClipWait(1)  ; 等待剪贴板内容变化，最多等待2秒
+    Send "^c"  ; 复制选中文本
+    if !ClipWait(2)  ; 等待剪贴板变化（最多 2 秒）
     {
-        MsgBox "未能获取选中的文本或没有选文本"
+        MsgBox "未能获取选中的文本或没有选中文本"
+        A_Clipboard := ClipSaved  ; 恢复剪贴板
         return
     }
-    SelectedText := A_Clipboard  ; 获取选中的文本
+    SelectedText := A_Clipboard  ; 获取选中文本
 
     ; URL 编码选中的文本
     EncodedText := UrlEncode(SelectedText)
 
-    ; 构造 Google 搜索 URL
-    SearchUrl := "https://www.google.com/search?q=" . EncodedText . "&hl=zh-CN&lr=zh-Hans|en"
+    ; 构造 baidu 搜索 URL
+    SearchUrl := "https://www.baidu.com/s?wd=" . EncodedText
 
-    ; 用 Chrome 打开搜索 URL
-    Run "chrome.exe " . SearchUrl
+    ; 判断 Edge 是否已经在运行
+    if WinExist("ahk_exe msedge.exe")
+    {
+        ; 如果 Edge 已经打开，使用 "microsoft-edge:" 方式打开新标签页
+        Run "microsoft-edge:" . SearchUrl
+    }
+    else
+    {
+        ; 如果 Edge 没有打开，则启动并在新标签页打开
+        Run "msedge.exe --new-tab " . SearchUrl
+    }
 
-    ; 等待Chrome窗口出现
-    WinWait "ahk_exe chrome.exe"
+    ; 激活 Edge 窗口
+    if WinWait("ahk_exe msedge.exe", , 3)  ; 最多等待 3 秒
+    {
+        WinActivate
+        WinMaximize
+    }
 
-    ; 激活Chrome窗口
-    WinActivate "ahk_exe chrome.exe"
-
-    ; 最大化Chrome窗口
-    WinMaximize "ahk_exe chrome.exe"
-
-    A_Clipboard := ClipSaved  ; 恢复原来的剪贴板内容
+    ; 恢复原来的剪贴板内容
+    A_Clipboard := ClipSaved
+    Sleep 100  ; 等待剪贴板恢复
     ClipSaved := ""  ; 释放内存
 }
+
 
 UrlEncode(Url, Flags := 0x000C3000) {
 	Local CC := 4096, Esc := "", Result := ""
@@ -132,4 +143,24 @@ OpenWebOnFirstLaunch() {
 }
 
 ; 每天自动打开热搜
+; =================================================================================
+
+
+
+; =================================================================================
+; 5号键改为复制粘贴
+
+toggle := false  ; 变量用于跟踪当前状态
+XButton2::  ; 按下鼠标侧键
+{
+    global toggle
+    if (toggle) {
+        Send "^v"  ; 如果 toggle 为 true，则执行粘贴
+    } else {
+        Send "^c"  ; 如果 toggle 为 false，则执行复制
+    }
+    toggle := !toggle  ; 切换 toggle 状态
+}
+
+; 5号键改为复制粘贴
 ; =================================================================================
