@@ -4,7 +4,7 @@
 ; =================================================================================
 ; 输入字符串
 
-CapsLock & a::   ; Tab + q 热键,input string
+CapsLock & a::   ; CapsLock + a 热键,input string
 {
     temp := EnvGet("mytemp")
     if !temp  ; 如果环境变量不存在
